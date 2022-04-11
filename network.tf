@@ -52,6 +52,7 @@ resource "azurerm_virtual_network_peering" "to_firewall_network" {
 }
 
 resource "azurerm_virtual_network_peering" "from_firewall_network" {
+  provider                     = azurerm.hub
   allow_forwarded_traffic      = true
   allow_virtual_network_access = true
   allow_gateway_transit        = true

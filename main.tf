@@ -22,6 +22,12 @@ provider "azurerm" {
   subscription_id = var.subscription_id
 }
 
+provider "azurerm" {
+  alias           = "hub"
+  subscription_id = var.hub_subscription_id
+  features {}
+}
+
 data "azurerm_client_config" "main" {}
 
 resource "azurerm_resource_group" "main" {

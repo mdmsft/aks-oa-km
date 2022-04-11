@@ -17,6 +17,10 @@ variable "subscription_id" {
   type = string
 }
 
+variable "hub_subscription_id" {
+  type = string
+}
+
 variable "firewall_ip_address" {
   type = string
 }
