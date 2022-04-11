@@ -13,6 +13,10 @@ variable "environment" {
   default = "dev"
 }
 
+variable "subscription_id" {
+  type = string
+}
+
 variable "firewall_ip_address" {
   type = string
 }
