@@ -4,17 +4,19 @@ locals {
 }
 
 resource "azurerm_kubernetes_cluster" "main" {
-  name                              = "aks-${local.resource_suffix}"
-  location                          = azurerm_resource_group.main.location
-  resource_group_name               = azurerm_resource_group.main.name
-  dns_prefix                        = local.context_name
-  automatic_channel_upgrade         = var.kubernetes_cluster_automatic_channel_upgrade
-  kubernetes_version                = var.kubernetes_cluster_orchestrator_version
-  sku_tier                          = var.kubernetes_cluster_sku_tier
-  role_based_access_control_enabled = true
-  local_account_disabled            = true
-  azure_policy_enabled              = var.kubernetes_cluster_azure_policy_enabled
-  public_network_access_enabled     = false
+  name                                = "aks-${local.resource_suffix}"
+  location                            = azurerm_resource_group.main.location
+  resource_group_name                 = azurerm_resource_group.main.name
+  dns_prefix                          = local.context_name
+  automatic_channel_upgrade           = var.kubernetes_cluster_automatic_channel_upgrade
+  kubernetes_version                  = var.kubernetes_cluster_orchestrator_version
+  sku_tier                            = var.kubernetes_cluster_sku_tier
+  role_based_access_control_enabled   = true
+  local_account_disabled              = true
+  azure_policy_enabled                = var.kubernetes_cluster_azure_policy_enabled
+  public_network_access_enabled       = false
+  private_cluster_enabled             = true
+  private_cluster_public_fqdn_enabled = true
 
   azure_active_directory_role_based_access_control {
     managed            = true
