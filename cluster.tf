@@ -62,6 +62,10 @@ resource "azurerm_kubernetes_cluster" "main" {
   oms_agent {
     log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
   }
+
+  depends_on = [
+    azurerm_subnet_route_table_association.kubernetes_cluster
+  ]
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "main" {
