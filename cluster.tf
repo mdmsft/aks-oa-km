@@ -53,12 +53,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     service_cidr       = var.kubernetes_cluster_service_cidr
     dns_service_ip     = cidrhost(var.kubernetes_cluster_service_cidr, 10)
     docker_bridge_cidr = var.kubernetes_cluster_docker_bridge_cidr
-
-    load_balancer_profile {
-      idle_timeout_in_minutes  = 4
-      outbound_ip_prefix_ids   = [azurerm_public_ip_prefix.kubernetes_cluster.id]
-      outbound_ports_allocated = ceil(64000 / (local.default_node_pool_total_count + local.workload_node_pool_total_count))
-    }
+    outbound_type      = "userDefinedRouting"
   }
 
   oms_agent {

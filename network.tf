@@ -9,7 +9,7 @@ resource "azurerm_subnet" "kubernetes_cluster" {
   name                 = "snet-aks"
   virtual_network_name = azurerm_virtual_network.main.name
   resource_group_name  = azurerm_resource_group.main.name
-  address_prefixes     = [cidrsubnet(var.address_space, 0, 1)]
+  address_prefixes     = [cidrsubnet(var.address_space, 1, 0)]
 }
 
 resource "azurerm_network_security_group" "kubernetes_cluster" {
@@ -23,39 +23,7 @@ resource "azurerm_subnet_network_security_group_association" "kubernetes_cluster
   subnet_id                 = azurerm_subnet.kubernetes_cluster.id
 }
 
-resource "azurerm_public_ip_prefix" "kubernetes_cluster" {
-  name                = "ippre-${local.resource_suffix}-aks"
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
-  sku                 = "Standard"
-  prefix_length       = var.kubernetes_cluster_public_ip_prefix_length
-}
-
-resource "azurerm_monitor_diagnostic_setting" "network_security_group" {
-  name               = "logs"
-  target_resource_id = azurerm_network_security_group.kubernetes_cluster.id
-  storage_account_id = azurerm_storage_account.logs.id
-
-  dynamic "log" {
-    for_each = toset([
-      "NetworkSecurityGroupEvent",
-      "NetworkSecurityGroupRuleCounter"
-    ])
-
-    content {
-      enabled  = true
-      category = log.value
-
-      retention_policy {
-        enabled = true
-        days    = 30
-      }
-    }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      metric
-    ]
-  }
+resource "azurerm_subnet_route_table_association" "kubernetes_cluster" {
+  route_table_id = var.route_table_id
+  subnet_id      = azurerm_subnet.kubernetes_cluster.id
 }

@@ -13,9 +13,13 @@ variable "environment" {
   default = "dev"
 }
 
+variable "route_table_id" {
+  type = string
+}
+
 variable "address_space" {
   type    = string
-  default = "172.17.0.0/24"
+  default = "10.218.36.0/26"
 }
 
 variable "kubernetes_cluster_public_ip_prefix_length" {
