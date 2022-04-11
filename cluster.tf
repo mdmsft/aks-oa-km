@@ -72,7 +72,9 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   depends_on = [
     azurerm_subnet_route_table_association.kubernetes_cluster,
-    azurerm_role_assignment.kubernetes_cluster_managed_identity
+    azurerm_role_assignment.kubernetes_cluster_managed_identity,
+    azurerm_virtual_network_peering.to_firewall_network,
+    azurerm_virtual_network_peering.from_firewall_network,
   ]
 }
 
