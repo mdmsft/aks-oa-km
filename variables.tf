@@ -13,7 +13,7 @@ variable "environment" {
   default = "dev"
 }
 
-variable "route_table_id" {
+variable "firewall_ip_address" {
   type = string
 }
 

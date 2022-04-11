@@ -23,7 +23,20 @@ resource "azurerm_subnet_network_security_group_association" "kubernetes_cluster
   subnet_id                 = azurerm_subnet.kubernetes_cluster.id
 }
 
+resource "azurerm_route_table" "main" {
+  name = "rt-${local.resource_suffix}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+
+  route {
+    name = "default"
+    address_prefix = "0.0.0.0/0"
+    next_hop_in_ip_address = var.firewall_ip_address
+    next_hop_type = "VirtualAppliance"
+  }
+}
+
 resource "azurerm_subnet_route_table_association" "kubernetes_cluster" {
-  route_table_id = var.route_table_id
+  route_table_id = azurerm_route_table.main.id
   subnet_id      = azurerm_subnet.kubernetes_cluster.id
 }

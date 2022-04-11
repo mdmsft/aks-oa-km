@@ -3,6 +3,12 @@ locals {
   workload_node_pool_total_count = var.kubernetes_cluster_workload_node_pool_max_count + (substr(var.kubernetes_cluster_workload_node_pool_max_surge, -1, -1) == "%" ? ceil(var.kubernetes_cluster_workload_node_pool_max_count * tonumber(trimsuffix(var.kubernetes_cluster_workload_node_pool_max_surge, "%")) / 100) : tonumber(var.kubernetes_cluster_workload_node_pool_max_surge))
 }
 
+resource "azurerm_user_assigned_identity" "kubernetes_cluster" {
+  name                = "id-${local.resource_suffix}-aks"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+}
+
 resource "azurerm_kubernetes_cluster" "main" {
   name                                = "aks-${local.resource_suffix}"
   location                            = azurerm_resource_group.main.location
@@ -24,7 +30,8 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   identity {
-    type = "SystemAssigned"
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.kubernetes_cluster.id]
   }
 
   default_node_pool {
@@ -64,7 +71,8 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   depends_on = [
-    azurerm_subnet_route_table_association.kubernetes_cluster
+    azurerm_subnet_route_table_association.kubernetes_cluster,
+    azurerm_role_assignment.kubernetes_cluster_managed_identity
   ]
 }
 
@@ -96,8 +104,12 @@ resource "azurerm_role_assignment" "client_aks_rbac_cluster_admin" {
   principal_id         = data.azurerm_client_config.main.object_id
 }
 
-resource "azurerm_role_assignment" "aks_network_contributor" {
-  role_definition_name = "Network Contributor"
-  scope                = azurerm_subnet.kubernetes_cluster.id
-  principal_id         = azurerm_kubernetes_cluster.main.identity[0].principal_id
+resource "azurerm_role_assignment" "kubernetes_cluster_managed_identity" {
+  for_each = {
+    "Network Contributor" = azurerm_subnet.kubernetes_cluster.id
+    "Contributor"         = azurerm_route_table.main.id
+  }
+  role_definition_name = each.key
+  scope                = each.value
+  principal_id         = azurerm_user_assigned_identity.kubernetes_cluster.principal_id
 }
