@@ -5,94 +5,22 @@ resource "azurerm_virtual_network" "main" {
   address_space       = [var.address_space]
 }
 
-resource "azurerm_subnet" "application_gateway" {
-  name                 = "snet-agw"
+resource "azurerm_subnet" "kubernetes_cluster" {
+  name                 = "snet-aks"
   virtual_network_name = azurerm_virtual_network.main.name
   resource_group_name  = azurerm_resource_group.main.name
-  address_prefixes     = [cidrsubnet(var.address_space, 8, 0)]
+  address_prefixes     = [cidrsubnet(var.address_space, 0, 1)]
 }
 
-resource "azurerm_subnet" "kubernetes_cluster_default_node_pool" {
-  name                 = "snet-aks-default"
-  virtual_network_name = azurerm_virtual_network.main.name
-  resource_group_name  = azurerm_resource_group.main.name
-  address_prefixes     = [cidrsubnet(var.address_space, 8, 1)]
-}
-
-resource "azurerm_subnet" "kubernetes_cluster_workload_node_pool" {
-  name                 = "snet-aks-workload"
-  virtual_network_name = azurerm_virtual_network.main.name
-  resource_group_name  = azurerm_resource_group.main.name
-  address_prefixes     = [cidrsubnet(var.address_space, 8, 2)]
-}
-
-resource "azurerm_network_security_group" "application_gateway" {
-  name                = "nsg-${local.resource_suffix}-agw"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  security_rule {
-    name                       = "AllowInternetIn"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_ranges    = ["80", "443"]
-    source_address_prefix      = "Internet"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "AllowGatewayManagerIn"
-    priority                   = 200
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "65200-65535"
-    source_address_prefix      = "GatewayManager"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "AllowAzureLoadBalancerIn"
-    priority                   = 300
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    source_address_prefix      = "AzureLoadBalancer"
-    destination_address_prefix = "*"
-  }
-}
-
-resource "azurerm_network_security_group" "kubernetes_cluster_default_node_pool" {
-  name                = "nsg-${local.resource_suffix}-aks-default"
+resource "azurerm_network_security_group" "kubernetes_cluster" {
+  name                = "nsg-${local.resource_suffix}-aks"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 }
 
-resource "azurerm_network_security_group" "kubernetes_cluster_workload_node_pool" {
-  name                = "nsg-${local.resource_suffix}-aks-workload"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-}
-
-resource "azurerm_subnet_network_security_group_association" "application_gateway" {
-  network_security_group_id = azurerm_network_security_group.application_gateway.id
-  subnet_id                 = azurerm_subnet.application_gateway.id
-}
-
-resource "azurerm_subnet_network_security_group_association" "kubernetes_cluster_default_node_pool" {
-  network_security_group_id = azurerm_network_security_group.kubernetes_cluster_default_node_pool.id
-  subnet_id                 = azurerm_subnet.kubernetes_cluster_default_node_pool.id
-}
-
-resource "azurerm_subnet_network_security_group_association" "kubernetes_cluster_workload_node_pool" {
-  network_security_group_id = azurerm_network_security_group.kubernetes_cluster_workload_node_pool.id
-  subnet_id                 = azurerm_subnet.kubernetes_cluster_workload_node_pool.id
+resource "azurerm_subnet_network_security_group_association" "kubernetes_cluster" {
+  network_security_group_id = azurerm_network_security_group.kubernetes_cluster.id
+  subnet_id                 = azurerm_subnet.kubernetes_cluster.id
 }
 
 resource "azurerm_public_ip_prefix" "kubernetes_cluster" {
@@ -103,18 +31,9 @@ resource "azurerm_public_ip_prefix" "kubernetes_cluster" {
   prefix_length       = var.kubernetes_cluster_public_ip_prefix_length
 }
 
-locals {
-  network_security_group_subnets = [
-    azurerm_network_security_group.application_gateway.id,
-    azurerm_network_security_group.kubernetes_cluster_default_node_pool.id,
-    azurerm_network_security_group.kubernetes_cluster_workload_node_pool.id
-  ]
-}
-
 resource "azurerm_monitor_diagnostic_setting" "network_security_group" {
-  count              = length(local.network_security_group_subnets)
   name               = "logs"
-  target_resource_id = local.network_security_group_subnets[count.index]
+  target_resource_id = azurerm_network_security_group.kubernetes_cluster.id
   storage_account_id = azurerm_storage_account.logs.id
 
   dynamic "log" {

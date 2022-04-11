@@ -15,7 +15,7 @@ variable "environment" {
 
 variable "address_space" {
   type    = string
-  default = "172.17.0.0/16"
+  default = "172.17.0.0/24"
 }
 
 variable "kubernetes_cluster_public_ip_prefix_length" {
@@ -43,6 +43,21 @@ variable "kubernetes_cluster_azure_policy_enabled" {
   default = true
 }
 
+variable "kubernetes_cluster_pod_cidr" {
+  type    = string
+  default = "192.168.0.0/16"
+}
+
+variable "kubernetes_cluster_service_cidr" {
+  type    = string
+  default = "10.0.0.0/24"
+}
+
+variable "kubernetes_cluster_docker_bridge_cidr" {
+  type    = string
+  default = "172.16.0.0/24"
+}
+
 variable "kubernetes_cluster_default_node_pool_vm_size" {
   type    = string
   default = "Standard_D4s_v3"
@@ -50,7 +65,7 @@ variable "kubernetes_cluster_default_node_pool_vm_size" {
 
 variable "kubernetes_cluster_default_node_pool_max_pods" {
   type    = number
-  default = 30
+  default = 110
 }
 
 variable "kubernetes_cluster_default_node_pool_min_count" {
@@ -101,7 +116,7 @@ variable "kubernetes_cluster_workload_node_pool_vm_size" {
 
 variable "kubernetes_cluster_workload_node_pool_max_pods" {
   type    = number
-  default = 30
+  default = 110
 }
 
 variable "kubernetes_cluster_workload_node_pool_min_count" {
@@ -157,40 +172,5 @@ variable "kubernetes_cluster_workload_node_pool_taints" {
 
 variable "kubernetes_cluster_network_policy" {
   type    = string
-  default = "azure"
-}
-
-variable "application_gateway_autoscale_configuration_min_capacity" {
-  type    = number
-  default = 1
-}
-
-variable "application_gateway_autoscale_configuration_max_capacity" {
-  type    = number
-  default = 3
-}
-
-variable "application_gateway_enable_http2" {
-  type    = bool
-  default = true
-}
-
-variable "web_application_firewall_policy_mode" {
-  type    = string
-  default = "Prevention"
-}
-
-variable "web_application_firewall_policy_file_upload_limit_in_mb" {
-  type    = number
-  default = 100
-}
-
-variable "web_application_firewall_policy_max_request_body_size_in_kb" {
-  type    = number
-  default = 128
-}
-
-variable "web_application_firewall_policy_request_body_check" {
-  type    = bool
-  default = true
+  default = "calico"
 }

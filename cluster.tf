@@ -1,10 +1,6 @@
 locals {
   default_node_pool_total_count  = var.kubernetes_cluster_default_node_pool_max_count + (substr(var.kubernetes_cluster_default_node_pool_max_surge, -1, -1) == "%" ? ceil(var.kubernetes_cluster_default_node_pool_max_count * tonumber(trimsuffix(var.kubernetes_cluster_default_node_pool_max_surge, "%")) / 100) : tonumber(var.kubernetes_cluster_default_node_pool_max_surge))
   workload_node_pool_total_count = var.kubernetes_cluster_workload_node_pool_max_count + (substr(var.kubernetes_cluster_workload_node_pool_max_surge, -1, -1) == "%" ? ceil(var.kubernetes_cluster_workload_node_pool_max_count * tonumber(trimsuffix(var.kubernetes_cluster_workload_node_pool_max_surge, "%")) / 100) : tonumber(var.kubernetes_cluster_workload_node_pool_max_surge))
-  subnets = [
-    azurerm_subnet.kubernetes_cluster_default_node_pool.id,
-    azurerm_subnet.kubernetes_cluster_workload_node_pool.id
-  ]
 }
 
 resource "azurerm_kubernetes_cluster" "main" {
@@ -40,7 +36,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     os_disk_type                 = var.kubernetes_cluster_default_node_pool_os_disk_type
     os_sku                       = var.kubernetes_cluster_default_node_pool_os_sku
     only_critical_addons_enabled = true
-    vnet_subnet_id               = azurerm_subnet.kubernetes_cluster_default_node_pool.id
+    vnet_subnet_id               = azurerm_subnet.kubernetes_cluster.id
     orchestrator_version         = var.kubernetes_cluster_default_node_pool_orchestrator_version == null ? var.kubernetes_cluster_orchestrator_version : var.kubernetes_cluster_default_node_pool_orchestrator_version
     zones                        = var.kubernetes_cluster_default_node_pool_availability_zones
 
@@ -50,9 +46,13 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   network_profile {
-    network_plugin    = "azure"
-    network_policy    = var.kubernetes_cluster_network_policy
-    load_balancer_sku = "standard"
+    network_plugin     = "kubenet"
+    network_policy     = var.kubernetes_cluster_network_policy
+    load_balancer_sku  = "standard"
+    pod_cidr           = var.kubernetes_cluster_pod_cidr
+    service_cidr       = var.kubernetes_cluster_service_cidr
+    dns_service_ip     = cidrhost(var.kubernetes_cluster_service_cidr, 10)
+    docker_bridge_cidr = var.kubernetes_cluster_docker_bridge_cidr
 
     load_balancer_profile {
       idle_timeout_in_minutes  = 4
@@ -63,10 +63,6 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   oms_agent {
     log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
-  }
-
-  ingress_application_gateway {
-    gateway_id = azurerm_application_gateway.main.id
   }
 }
 
@@ -81,7 +77,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "main" {
   os_disk_size_gb       = var.kubernetes_cluster_workload_node_pool_os_disk_size_gb
   os_disk_type          = var.kubernetes_cluster_workload_node_pool_os_disk_type
   os_sku                = var.kubernetes_cluster_workload_node_pool_os_sku
-  vnet_subnet_id        = azurerm_subnet.kubernetes_cluster_workload_node_pool.id
+  vnet_subnet_id        = azurerm_subnet.kubernetes_cluster.id
   orchestrator_version  = var.kubernetes_cluster_workload_node_pool_orchestrator_version == null ? var.kubernetes_cluster_orchestrator_version : var.kubernetes_cluster_workload_node_pool_orchestrator_version
   zones                 = var.kubernetes_cluster_workload_node_pool_availability_zones
   node_labels           = var.kubernetes_cluster_workload_node_pool_labels
@@ -99,19 +95,7 @@ resource "azurerm_role_assignment" "client_aks_rbac_cluster_admin" {
 }
 
 resource "azurerm_role_assignment" "aks_network_contributor" {
-  count                = length(local.subnets)
   role_definition_name = "Network Contributor"
-  scope                = local.subnets[count.index]
+  scope                = azurerm_subnet.kubernetes_cluster.id
   principal_id         = azurerm_kubernetes_cluster.main.identity[0].principal_id
-}
-
-resource "azurerm_role_assignment" "application_gateway" {
-  for_each = {
-    "Contributor"               = azurerm_application_gateway.main.id
-    "Reader"                    = azurerm_resource_group.main.id
-    "Managed Identity Operator" = azurerm_user_assigned_identity.application_gateway.id
-  }
-  scope                = each.value
-  role_definition_name = each.key
-  principal_id         = azurerm_kubernetes_cluster.main.ingress_application_gateway[0].ingress_application_gateway_identity[0].object_id
 }

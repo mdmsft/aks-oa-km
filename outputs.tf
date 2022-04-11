@@ -17,7 +17,3 @@ output "container_registry_name" {
 output "container_registry_login_server" {
   value = azurerm_container_registry.main.login_server
 }
-
-output "application_gateway_fqdn" {
-  value = azurerm_public_ip.application_gateway.fqdn
-}
