@@ -14,6 +14,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   role_based_access_control_enabled = true
   local_account_disabled            = true
   azure_policy_enabled              = var.kubernetes_cluster_azure_policy_enabled
+  public_network_access_enabled     = false
 
   azure_active_directory_role_based_access_control {
     managed            = true
