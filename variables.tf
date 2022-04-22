@@ -25,6 +25,10 @@ variable "hub_subscription_id" {
   type = string
 }
 
+variable "kubernetes_cluster_admin_principal_id" {
+  type = string
+}
+
 variable "firewall_ip_address" {
   type = string
 }

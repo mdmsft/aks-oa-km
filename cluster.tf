@@ -121,7 +121,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "main" {
 resource "azurerm_role_assignment" "client_aks_rbac_cluster_admin" {
   role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
   scope                = azurerm_kubernetes_cluster.main.id
-  principal_id         = data.azurerm_client_config.main.object_id
+  principal_id         = var.kubernetes_cluster_admin_principal_id
 }
 
 resource "azurerm_role_assignment" "kubernetes_cluster_managed_identity" {
