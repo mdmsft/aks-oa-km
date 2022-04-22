@@ -1,3 +1,8 @@
+locals {
+  mysql_private_dns_zone_resource_group_name = split("/", var.mysql_private_dns_zone_id)[4]
+  mysql_private_dns_zone_name                = reverse(split("/", var.mysql_private_dns_zone_id))[0]
+}
+
 resource "azurerm_virtual_network" "main" {
   name                = "vnet-${local.resource_suffix}"
   location            = azurerm_resource_group.main.location
@@ -87,4 +92,18 @@ resource "azurerm_virtual_network_peering" "from_firewall_network" {
   resource_group_name          = split("/", var.remote_virtual_network_id)[4]
   remote_virtual_network_id    = azurerm_virtual_network.main.id
   virtual_network_name         = reverse(split("/", var.remote_virtual_network_id))[0]
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "mysql" {
+  name                  = azurerm_virtual_network.main.name
+  private_dns_zone_name = local.mysql_private_dns_zone_name
+  resource_group_name   = local.mysql_private_dns_zone_resource_group_name
+  registration_enabled  = false
+  virtual_network_id    = azurerm_virtual_network.main.id
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
