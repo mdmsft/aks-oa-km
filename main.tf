@@ -21,12 +21,14 @@ provider "azurerm" {
   }
   use_msi         = true
   subscription_id = var.subscription_id
+  tenant_id       = var.tenant_id
 }
 
 provider "azurerm" {
   alias           = "hub"
   use_msi         = true
   subscription_id = var.hub_subscription_id
+  tenant_id       = var.tenant_id
   features {}
 }
 
