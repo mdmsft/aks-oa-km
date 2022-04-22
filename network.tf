@@ -3,6 +3,12 @@ resource "azurerm_virtual_network" "main" {
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   address_space       = [var.address_space]
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_subnet" "kubernetes_cluster" {
@@ -25,6 +31,12 @@ resource "azurerm_network_security_group" "kubernetes_cluster" {
   name                = "nsg-${local.resource_suffix}-aks"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "kubernetes_cluster" {
@@ -42,6 +54,12 @@ resource "azurerm_route_table" "main" {
     address_prefix         = "0.0.0.0/0"
     next_hop_in_ip_address = var.firewall_ip_address
     next_hop_type          = "VirtualAppliance"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
   }
 }
 

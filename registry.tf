@@ -11,6 +11,12 @@ resource "azurerm_container_registry" "main" {
   sku                           = "Premium"
   anonymous_pull_enabled        = false
   public_network_access_enabled = false
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_role_assignment" "aks_acr_pull" {
@@ -26,6 +32,12 @@ resource "azurerm_private_dns_zone_virtual_network_link" "main" {
   resource_group_name   = local.container_registry_private_dns_zone_resource_group_name
   registration_enabled  = false
   virtual_network_id    = azurerm_virtual_network.main.id
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_private_endpoint" "container_registry" {
@@ -44,5 +56,11 @@ resource "azurerm_private_endpoint" "container_registry" {
   private_dns_zone_group {
     name                 = local.container_registry_private_dns_zone_name
     private_dns_zone_ids = [var.container_registry_private_dns_zone_id]
+  }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
   }
 }

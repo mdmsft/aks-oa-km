@@ -7,6 +7,12 @@ resource "azurerm_user_assigned_identity" "kubernetes_cluster" {
   name                = "id-${local.resource_suffix}-aks"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_kubernetes_cluster" "main" {
@@ -76,6 +82,12 @@ resource "azurerm_kubernetes_cluster" "main" {
     azurerm_virtual_network_peering.to_firewall_network,
     azurerm_virtual_network_peering.from_firewall_network,
   ]
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "main" {
@@ -97,6 +109,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "main" {
 
   upgrade_settings {
     max_surge = var.kubernetes_cluster_workload_node_pool_max_surge
+  }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
   }
 }
 

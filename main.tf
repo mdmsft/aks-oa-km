@@ -37,9 +37,16 @@ data "azurerm_client_config" "main" {}
 resource "azurerm_resource_group" "main" {
   name     = "rg-${local.resource_suffix}"
   location = var.location
+
   tags = {
     project     = var.project
     environment = var.environment
     location    = var.location
+  }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
   }
 }
