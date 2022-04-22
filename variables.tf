@@ -29,6 +29,10 @@ variable "remote_virtual_network_id" {
   type = string
 }
 
+variable "container_registry_private_dns_zone_id" {
+  type = string
+}
+
 variable "address_space" {
   type    = string
   default = "10.218.36.0/26"

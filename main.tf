@@ -19,11 +19,13 @@ provider "azurerm" {
       prevent_deletion_if_contains_resources = false
     }
   }
+  use_msi         = true
   subscription_id = var.subscription_id
 }
 
 provider "azurerm" {
   alias           = "hub"
+  use_msi         = true
   subscription_id = var.hub_subscription_id
   features {}
 }

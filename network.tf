@@ -6,10 +6,19 @@ resource "azurerm_virtual_network" "main" {
 }
 
 resource "azurerm_subnet" "kubernetes_cluster" {
-  name                 = "snet-aks"
-  virtual_network_name = azurerm_virtual_network.main.name
-  resource_group_name  = azurerm_resource_group.main.name
-  address_prefixes     = [cidrsubnet(var.address_space, 1, 0)]
+  name                                           = "snet-aks"
+  virtual_network_name                           = azurerm_virtual_network.main.name
+  resource_group_name                            = azurerm_resource_group.main.name
+  address_prefixes                               = [cidrsubnet(var.address_space, 1, 0)]
+  enforce_private_link_endpoint_network_policies = true
+}
+
+resource "azurerm_subnet" "private_endpoints" {
+  name                                           = "snet-svc"
+  virtual_network_name                           = azurerm_virtual_network.main.name
+  resource_group_name                            = azurerm_resource_group.main.name
+  address_prefixes                               = [cidrsubnet(var.address_space, 1, 1)]
+  enforce_private_link_endpoint_network_policies = true
 }
 
 resource "azurerm_network_security_group" "kubernetes_cluster" {
