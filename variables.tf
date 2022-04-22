@@ -33,7 +33,11 @@ variable "firewall_ip_address" {
   type = string
 }
 
-variable "remote_virtual_network_id" {
+variable "hub_virtual_network_id" {
+  type = string
+}
+
+variable "production_virtual_network_id" {
   type = string
 }
 

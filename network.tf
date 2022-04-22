@@ -79,7 +79,7 @@ resource "azurerm_virtual_network_peering" "to_firewall_network" {
   allow_gateway_transit        = true
   name                         = "peer-${local.resource_suffix}-remote"
   resource_group_name          = azurerm_resource_group.main.name
-  remote_virtual_network_id    = var.remote_virtual_network_id
+  remote_virtual_network_id    = var.hub_virtual_network_id
   virtual_network_name         = azurerm_virtual_network.main.name
 }
 
@@ -89,9 +89,29 @@ resource "azurerm_virtual_network_peering" "from_firewall_network" {
   allow_virtual_network_access = true
   allow_gateway_transit        = true
   name                         = "peer-${local.resource_suffix}-aks"
-  resource_group_name          = split("/", var.remote_virtual_network_id)[4]
+  resource_group_name          = split("/", var.hub_virtual_network_id)[4]
   remote_virtual_network_id    = azurerm_virtual_network.main.id
-  virtual_network_name         = reverse(split("/", var.remote_virtual_network_id))[0]
+  virtual_network_name         = reverse(split("/", var.hub_virtual_network_id))[0]
+}
+
+resource "azurerm_virtual_network_peering" "to_production_network" {
+  allow_forwarded_traffic      = true
+  allow_virtual_network_access = true
+  allow_gateway_transit        = true
+  name                         = "peer-${local.resource_suffix}-production"
+  resource_group_name          = azurerm_resource_group.main.name
+  remote_virtual_network_id    = var.production_virtual_network_id
+  virtual_network_name         = azurerm_virtual_network.main.name
+}
+
+resource "azurerm_virtual_network_peering" "from_production_network" {
+  allow_forwarded_traffic      = true
+  allow_virtual_network_access = true
+  allow_gateway_transit        = true
+  name                         = "peer-${local.resource_suffix}-aks"
+  resource_group_name          = split("/", var.production_virtual_network_id)[4]
+  remote_virtual_network_id    = azurerm_virtual_network.main.id
+  virtual_network_name         = reverse(split("/", var.production_virtual_network_id))[0]
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "mysql" {
