@@ -95,24 +95,26 @@ resource "azurerm_virtual_network_peering" "from_firewall_network" {
   virtual_network_name         = reverse(split("/", var.hub_virtual_network_id))[0]
 }
 
-resource "azurerm_virtual_network_peering" "to_production_network" {
+resource "azurerm_virtual_network_peering" "to_remote_network" {
+  for_each                     = var.remote_virtual_network_ids
   allow_forwarded_traffic      = true
   allow_virtual_network_access = true
   allow_gateway_transit        = false
-  name                         = "peer-${local.resource_suffix}-production"
+  name                         = "peer-${local.resource_suffix}-${reverse(split("/", each.value))[0]}"
   resource_group_name          = azurerm_resource_group.main.name
-  remote_virtual_network_id    = var.production_virtual_network_id
+  remote_virtual_network_id    = each.value
   virtual_network_name         = azurerm_virtual_network.main.name
 }
 
-resource "azurerm_virtual_network_peering" "from_production_network" {
+resource "azurerm_virtual_network_peering" "from_remote_network" {
+  for_each                     = var.remote_virtual_network_ids
   allow_forwarded_traffic      = true
   allow_virtual_network_access = true
   allow_gateway_transit        = false
   name                         = "peer-${local.resource_suffix}-aks"
-  resource_group_name          = split("/", var.production_virtual_network_id)[4]
+  resource_group_name          = split("/", each.value)[4]
   remote_virtual_network_id    = azurerm_virtual_network.main.id
-  virtual_network_name         = reverse(split("/", var.production_virtual_network_id))[0]
+  virtual_network_name         = reverse(split("/", each.value))[0]
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "mysql" {

@@ -42,8 +42,9 @@ variable "hub_virtual_network_id" {
   type = string
 }
 
-variable "production_virtual_network_id" {
-  type = string
+variable "remote_virtual_network_ids" {
+  type    = set(string)
+  default = []
 }
 
 variable "container_registry_private_dns_zone_id" {
