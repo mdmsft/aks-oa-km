@@ -4,7 +4,7 @@ locals {
 }
 
 resource "azurerm_container_registry" "main" {
-  name                          = "cr${var.project}${var.environment}weu"
+  name                          = "cr${var.project}${var.environment}${var.container_registry_suffix}"
   resource_group_name           = azurerm_resource_group.main.name
   location                      = azurerm_resource_group.main.location
   admin_enabled                 = false

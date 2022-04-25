@@ -13,6 +13,11 @@ variable "environment" {
   default = "dev"
 }
 
+variable "use_msi" {
+  type    = bool
+  default = true
+}
+
 variable "tenant_id" {
   type = string
 }
@@ -209,4 +214,9 @@ variable "kubernetes_cluster_workload_node_pool_taints" {
 variable "kubernetes_cluster_network_policy" {
   type    = string
   default = "calico"
+}
+
+variable "container_registry_suffix" {
+  type    = string
+  default = "euw"
 }
