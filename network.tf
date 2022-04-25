@@ -77,7 +77,7 @@ resource "azurerm_subnet_route_table_association" "kubernetes_cluster" {
 resource "azurerm_virtual_network_peering" "to_firewall_network" {
   allow_forwarded_traffic      = true
   allow_virtual_network_access = true
-  allow_gateway_transit        = true
+  allow_gateway_transit        = false
   name                         = "peer-${local.resource_suffix}-remote"
   resource_group_name          = azurerm_resource_group.main.name
   remote_virtual_network_id    = var.hub_virtual_network_id
@@ -88,7 +88,7 @@ resource "azurerm_virtual_network_peering" "from_firewall_network" {
   provider                     = azurerm.hub
   allow_forwarded_traffic      = true
   allow_virtual_network_access = true
-  allow_gateway_transit        = true
+  allow_gateway_transit        = false
   name                         = "peer-${local.resource_suffix}-aks"
   resource_group_name          = split("/", var.hub_virtual_network_id)[4]
   remote_virtual_network_id    = azurerm_virtual_network.main.id
@@ -98,7 +98,7 @@ resource "azurerm_virtual_network_peering" "from_firewall_network" {
 resource "azurerm_virtual_network_peering" "to_production_network" {
   allow_forwarded_traffic      = true
   allow_virtual_network_access = true
-  allow_gateway_transit        = true
+  allow_gateway_transit        = false
   name                         = "peer-${local.resource_suffix}-production"
   resource_group_name          = azurerm_resource_group.main.name
   remote_virtual_network_id    = var.production_virtual_network_id
@@ -108,7 +108,7 @@ resource "azurerm_virtual_network_peering" "to_production_network" {
 resource "azurerm_virtual_network_peering" "from_production_network" {
   allow_forwarded_traffic      = true
   allow_virtual_network_access = true
-  allow_gateway_transit        = true
+  allow_gateway_transit        = false
   name                         = "peer-${local.resource_suffix}-aks"
   resource_group_name          = split("/", var.production_virtual_network_id)[4]
   remote_virtual_network_id    = azurerm_virtual_network.main.id
