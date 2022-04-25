@@ -7,20 +7,16 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
-  defaultBackend:
-    resource:
-      kind: Service
-      name: nginx
   tls:
     - hosts:
       - dx360.konicaminolta.de
       secretName: germany
-    - hosts:
-      - dx360.konicaminolta.at
-      secretName: austria
-    - hosts:
-      - dx360.konicaminolta.co.uk
-      secretName: uk
+    # - hosts:
+    #   - dx360.konicaminolta.at
+    #   secretName: austria
+    # - hosts:
+    #   - dx360.konicaminolta.co.uk
+    #   secretName: uk
   rules:
   - host: dx360.konicaminolta.de
     http:
@@ -31,24 +27,24 @@ spec:
           service:
             name: svc-dx-360-germany-dev
             port: 
-              number: 80
-  - host: dx360.konicaminolta.at
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: svc-dx-360-austria-dev
-            port: 
-              number: 80
-  - host: dx360.konicaminolta.co.uk
-    http:    
-      paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: svc-dx-360-uk-dev
-            port: 
-              number: 80
+              number: 443
+  # - host: dx360.konicaminolta.at
+  #   http:
+  #     paths:
+  #     - pathType: Prefix
+  #       path: "/"
+  #       backend:
+  #         service:
+  #           name: svc-dx-360-austria-dev
+  #           port: 
+  #             number: 80
+  # - host: dx360.konicaminolta.co.uk
+  #   http:    
+  #     paths:
+  #     - pathType: Prefix
+  #       path: "/"
+  #       backend:
+  #         service:
+  #           name: svc-dx-360-uk-dev
+  #           port: 
+  #             number: 80
