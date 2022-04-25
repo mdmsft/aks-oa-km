@@ -22,7 +22,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: dx-360-germany-dev
-        image: crkmdevwesteurope.azurecr.io/dx-360-germany-dev-1:v1
+        image: crkmdeveuw.azurecr.io/dx-360-germany-dev-1:v1
         command: ["bash","-c","cd /var/www/html/ && apache2-foreground"]
         ports:
         - containerPort: 80
