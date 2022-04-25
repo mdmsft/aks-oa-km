@@ -2,10 +2,15 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nginx
+  namespace: default
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
+  defaultBackend:
+    resource:
+      kind: Service
+      name: nginx
   tls:
     - hosts:
       - dx360.konicaminolta.de
