@@ -28,7 +28,7 @@ spec:
         - containerPort: 443
         env:
         - name: DB_NAME
-          value: "devgermany"
+          value: "dev360_germany"
         - name: DB_USER
           value: "devadmin@mysql007"
         - name: DB_PASS
