@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - dx360.konicaminolta.de
+      secretName: germany
+    - hosts:
+      - dx360.konicaminolta.at
+      secretName: austria
+    - hosts:
+      - dx360.konicaminolta.co.uk
+      secretName: uk
+  rules:
+  - host: dx360.konicaminolta.de
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: svc-dx-360-germany-dev
+            port: 
+              number: 80
+  - host: dx360.konicaminolta.at
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: svc-dx-360-austria-dev
+            port: 
+              number: 80
+  - host: dx360.konicaminolta.co.uk
+    http:    
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: svc-dx-360-uk-dev
+            port: 
+              number: 80

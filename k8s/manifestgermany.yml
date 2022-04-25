@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dx-360-germany-dev
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dx-360-germany-dev
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5 
+  template:
+    metadata:
+      labels:
+        app: dx-360-germany-dev
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: dx-360-germany-dev
+        image: crkmdevwesteurope.azurecr.io/dx-360-germany-dev-1:v1
+        command: ["bash","-c","cd /var/www/html/ && apache2-foreground"]
+        ports:
+        - containerPort: 80
+        env:
+        - name: DB_NAME
+          value: "devgermany"
+        - name: DB_USER
+          value: "devadmin@mysql007"
+        - name: DB_PASS
+          value: "Admin@123"
+        - name: DB_HOST
+          value: "mysql007.mysql.database.azure.com"
+        - name: DB_PORT
+          value: "3306"
+        resources:
+          requests:
+            cpu: "1"
+          limits:
+            cpu: "2"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-dx-360-germany-dev
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+  selector:
+    app: dx-360-germany-dev

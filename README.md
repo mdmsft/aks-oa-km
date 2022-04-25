@@ -19,3 +19,8 @@ kubelogin convert-kubeconfig -l msi|azurecli
 ```sh
 helm upgrade --install ingress-nginx ingress-nginx --repo https://kubernetes.github.io/ingress-nginx --namespace ingress-nginx --create-namespace --set controller.service.annotations."service\.beta\.kubernetes\.io\/azure-load-balancer-internal"="true" --set controller.service.loadBalancerIP=10.218.36.x
 ```
+
+# TLS
+```sh
+kubectl create secret tls germany|austria|uk --cert ... --key ...
+```
