@@ -21,7 +21,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
   }
 
   network_interface {
-    name = "nic-${local.resource_suffix}-vms"
+    name    = "nic-${local.resource_suffix}-vms"
+    primary = true
+
     ip_configuration {
       name      = "primary"
       primary   = true
