@@ -25,6 +25,12 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
   principal_id         = azurerm_kubernetes_cluster.main.kubelet_identity.0.object_id
 }
 
+resource "azurerm_role_assignment" "agent_acr_push" {
+  role_definition_name = "AcrPush"
+  scope                = azurerm_container_registry.main.id
+  principal_id         = azurerm_linux_virtual_machine_scale_set.main.identity[0].principal_id
+}
+
 resource "azurerm_private_dns_zone_virtual_network_link" "main" {
   name                  = azurerm_virtual_network.main.name
   provider              = azurerm.hub

@@ -124,6 +124,12 @@ resource "azurerm_role_assignment" "client_aks_rbac_cluster_admin" {
   principal_id         = var.kubernetes_cluster_admin_principal_id
 }
 
+resource "azurerm_role_assignment" "agent_aks_rbac_cluster_admin" {
+  role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
+  scope                = azurerm_kubernetes_cluster.main.id
+  principal_id         = azurerm_linux_virtual_machine_scale_set.main.identity[0].principal_id
+}
+
 resource "azurerm_role_assignment" "kubernetes_cluster_managed_identity" {
   for_each = {
     "Network Contributor" = azurerm_subnet.kubernetes_cluster.id

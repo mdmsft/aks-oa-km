@@ -1,10 +1,17 @@
 resource "azurerm_linux_virtual_machine_scale_set" "main" {
-  name                = "vmss-${local.resource_suffix}"
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
-  sku                 = var.agent_sku
-  instances           = var.agent_instances
-  admin_username      = var.agent_admin_username
+  name                            = "vmss-${local.resource_suffix}"
+  resource_group_name             = azurerm_resource_group.main.name
+  location                        = azurerm_resource_group.main.location
+  sku                             = var.agent_sku
+  instances                       = var.agent_instances
+  admin_username                  = var.agent_admin_username
+  admin_password                  = var.agent_admin_password
+  disable_password_authentication = false
+  custom_data                     = base64encode(templatefile("${path.module}/cloud-config.yml", {}))
+
+  identity {
+    type = "SystemAssigned"
+  }
 
   source_image_reference {
     publisher = "Canonical"
