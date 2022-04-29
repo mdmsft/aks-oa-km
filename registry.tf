@@ -40,6 +40,21 @@ resource "azurerm_private_dns_zone_virtual_network_link" "main" {
   }
 }
 
+resource "azurerm_private_dns_zone_virtual_network_link" "agent" {
+  name                  = azurerm_virtual_network.agent.name
+  provider              = azurerm.hub
+  private_dns_zone_name = local.container_registry_private_dns_zone_name
+  resource_group_name   = local.container_registry_private_dns_zone_resource_group_name
+  registration_enabled  = false
+  virtual_network_id    = azurerm_virtual_network.agent.id
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
 resource "azurerm_private_endpoint" "container_registry" {
   name                = "pe-${local.resource_suffix}-cr"
   resource_group_name = azurerm_resource_group.main.name

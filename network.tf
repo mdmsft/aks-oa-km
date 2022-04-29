@@ -8,7 +8,21 @@ resource "azurerm_virtual_network" "main" {
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   address_space = [
-    var.address_space,
+    var.address_space
+  ]
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+resource "azurerm_virtual_network" "agent" {
+  name                = "vnet-${local.resource_suffix}-agent"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  address_space = [
     var.agent_address_space
   ]
 
@@ -37,7 +51,7 @@ resource "azurerm_subnet" "private_endpoints" {
 
 resource "azurerm_subnet" "agents" {
   name                                           = "snet-vms"
-  virtual_network_name                           = azurerm_virtual_network.main.name
+  virtual_network_name                           = azurerm_virtual_network.agent.name
   resource_group_name                            = azurerm_resource_group.main.name
   address_prefixes                               = [cidrsubnet(var.agent_address_space, 1, 0)]
   enforce_private_link_endpoint_network_policies = true
@@ -148,6 +162,26 @@ resource "azurerm_virtual_network_peering" "from_remote_network" {
   resource_group_name          = split("/", each.value)[4]
   remote_virtual_network_id    = azurerm_virtual_network.main.id
   virtual_network_name         = reverse(split("/", each.value))[0]
+}
+
+resource "azurerm_virtual_network_peering" "main_agent" {
+  allow_forwarded_traffic      = true
+  allow_virtual_network_access = true
+  allow_gateway_transit        = false
+  name                         = "peer-${local.resource_suffix}-agent"
+  resource_group_name          = azurerm_resource_group.main.name
+  remote_virtual_network_id    = azurerm_virtual_network.agent.id
+  virtual_network_name         = azurerm_virtual_network.main.name
+}
+
+resource "azurerm_virtual_network_peering" "agent_main" {
+  allow_forwarded_traffic      = true
+  allow_virtual_network_access = true
+  allow_gateway_transit        = false
+  name                         = "peer-${local.resource_suffix}-main"
+  resource_group_name          = azurerm_resource_group.main.name
+  remote_virtual_network_id    = azurerm_virtual_network.main.id
+  virtual_network_name         = azurerm_virtual_network.agent.name
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "mysql" {
