@@ -22,10 +22,10 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: dx-360-germany-dev
-        image: crkmdeveuw.azurecr.io/dx-360-germany-dev-3:v1
+        image: crkmdeveuw.azurecr.io/dx-360-germany-dev-1:v1
         command: ["bash","-c","cd /var/www/html/ && apache2-foreground"]
         ports:
-        - containerPort: 443
+        - containerPort: 80
         env:
         - name: DB_NAME
           value: "dev360_germany"
@@ -51,6 +51,6 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 443
+  - port: 80
   selector:
     app: dx-360-germany-dev
