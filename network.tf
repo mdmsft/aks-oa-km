@@ -185,6 +185,7 @@ resource "azurerm_virtual_network_peering" "agent_main" {
 }
 
 resource "azurerm_virtual_network_peering" "firewall_agent" {
+  provider                     = azurerm.hub
   allow_forwarded_traffic      = true
   allow_virtual_network_access = true
   allow_gateway_transit        = false
