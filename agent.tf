@@ -8,6 +8,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
   admin_password                  = var.agent_admin_password
   disable_password_authentication = false
   custom_data                     = base64encode(templatefile("${path.module}/cloud-config.yml", {}))
+  single_placement_group          = false
+  overprovision                   = false
+  platform_fault_domain_count     = 1
 
   identity {
     type = "SystemAssigned"
