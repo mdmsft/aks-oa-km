@@ -184,6 +184,49 @@ resource "azurerm_virtual_network_peering" "agent_main" {
   virtual_network_name         = azurerm_virtual_network.agent.name
 }
 
+resource "azurerm_virtual_network_peering" "firewall_agent" {
+  allow_forwarded_traffic      = true
+  allow_virtual_network_access = true
+  allow_gateway_transit        = false
+  name                         = "peer-${local.resource_suffix}-agent"
+  resource_group_name          = split("/", var.hub_virtual_network_id)[4]
+  remote_virtual_network_id    = azurerm_virtual_network.agent.id
+  virtual_network_name         = reverse(split("/", var.hub_virtual_network_id))[0]
+}
+
+resource "azurerm_virtual_network_peering" "agent_firewall" {
+  allow_forwarded_traffic      = true
+  allow_virtual_network_access = true
+  allow_gateway_transit        = false
+  name                         = "peer-${local.resource_suffix}-firewall"
+  resource_group_name          = azurerm_resource_group.main.name
+  remote_virtual_network_id    = var.hub_virtual_network_id
+  virtual_network_name         = azurerm_virtual_network.agent.name
+}
+
+resource "azurerm_virtual_network_peering" "agent_remote" {
+  for_each                     = var.remote_virtual_network_ids
+  allow_forwarded_traffic      = true
+  allow_virtual_network_access = true
+  allow_gateway_transit        = false
+  name                         = "peer-${local.resource_suffix}-${reverse(split("/", each.value))[0]}"
+  resource_group_name          = azurerm_resource_group.main.name
+  remote_virtual_network_id    = each.value
+  virtual_network_name         = azurerm_virtual_network.agent.name
+}
+
+resource "azurerm_virtual_network_peering" "remote_agent" {
+  for_each                     = var.remote_virtual_network_ids
+  allow_forwarded_traffic      = true
+  allow_virtual_network_access = true
+  allow_gateway_transit        = false
+  name                         = "peer-${local.resource_suffix}-agent"
+  resource_group_name          = split("/", each.value)[4]
+  remote_virtual_network_id    = azurerm_virtual_network.agent.id
+  virtual_network_name         = reverse(split("/", each.value))[0]
+}
+
+
 resource "azurerm_private_dns_zone_virtual_network_link" "mysql" {
   name                  = azurerm_virtual_network.main.name
   private_dns_zone_name = local.mysql_private_dns_zone_name
