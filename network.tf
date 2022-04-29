@@ -7,7 +7,10 @@ resource "azurerm_virtual_network" "main" {
   name                = "vnet-${local.resource_suffix}"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  address_space       = [var.address_space]
+  address_space = [
+    var.address_space,
+    var.agent_address_space
+  ]
 
   lifecycle {
     ignore_changes = [
@@ -32,8 +35,28 @@ resource "azurerm_subnet" "private_endpoints" {
   enforce_private_link_endpoint_network_policies = true
 }
 
+resource "azurerm_subnet" "agents" {
+  name                                           = "snet-vms"
+  virtual_network_name                           = azurerm_virtual_network.main.name
+  resource_group_name                            = azurerm_resource_group.main.name
+  address_prefixes                               = [cidrsubnet(var.agent_address_space, 1, 0)]
+  enforce_private_link_endpoint_network_policies = true
+}
+
 resource "azurerm_network_security_group" "kubernetes_cluster" {
   name                = "nsg-${local.resource_suffix}-aks"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+resource "azurerm_network_security_group" "agents" {
+  name                = "nsg-${local.resource_suffix}-vms"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 
@@ -47,6 +70,11 @@ resource "azurerm_network_security_group" "kubernetes_cluster" {
 resource "azurerm_subnet_network_security_group_association" "kubernetes_cluster" {
   network_security_group_id = azurerm_network_security_group.kubernetes_cluster.id
   subnet_id                 = azurerm_subnet.kubernetes_cluster.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "agents" {
+  network_security_group_id = azurerm_network_security_group.agents.id
+  subnet_id                 = azurerm_subnet.agents.id
 }
 
 resource "azurerm_route_table" "main" {
@@ -72,6 +100,11 @@ resource "azurerm_route_table" "main" {
 resource "azurerm_subnet_route_table_association" "kubernetes_cluster" {
   route_table_id = azurerm_route_table.main.id
   subnet_id      = azurerm_subnet.kubernetes_cluster.id
+}
+
+resource "azurerm_subnet_route_table_association" "agents" {
+  route_table_id = azurerm_route_table.main.id
+  subnet_id      = azurerm_subnet.agents.id
 }
 
 resource "azurerm_virtual_network_peering" "to_firewall_network" {

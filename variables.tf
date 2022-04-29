@@ -60,6 +60,11 @@ variable "address_space" {
   default = "10.218.36.0/26"
 }
 
+variable "agent_address_space" {
+  type    = string
+  default = "10.218.64.0/26"
+}
+
 variable "kubernetes_cluster_public_ip_prefix_length" {
   type    = number
   default = 31
@@ -220,4 +225,19 @@ variable "kubernetes_cluster_network_policy" {
 variable "container_registry_suffix" {
   type    = string
   default = "euw"
+}
+
+variable "agent_sku" {
+  type    = string
+  default = "Standard_F4s_v2"
+}
+
+variable "agent_instances" {
+  type    = number
+  default = 1
+}
+
+variable "agent_admin_username" {
+  type    = string
+  default = "azure"
 }
